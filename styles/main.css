@@ -207,27 +207,31 @@ h2 {
 }
 
 /* Webcam Screen */
-.webcam-container {
-    position: relative;
-    max-width: 640px;
-    margin: 0 auto 30px;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-}
-
 #webcam-screen .container {
     max-width: 100%;
     padding: 20px;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 50px);
-    justify-content: space-between;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.webcam-container {
+    position: relative;
+    max-width: 640px;
+    width: 100%;
+    max-height: 50vh;
+    margin: 0 auto 20px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    aspect-ratio: 4 / 3;
 }
 
 #webcam-video {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
     background: #000;
 }
@@ -275,8 +279,8 @@ h2 {
     gap: 20px;
     justify-content: center;
     flex-shrink: 0;
-    margin-top: auto;
-    padding-top: 20px;
+    width: 100%;
+    max-width: 640px;
 }
 
 /* Analysis Screen */
@@ -599,7 +603,12 @@ h2 {
 
     .webcam-container {
         max-width: 100%;
-        margin: 0 auto 20px;
+        max-height: 50vh;
+        margin: 0 auto 15px;
+    }
+
+    .webcam-controls {
+        max-width: 100%;
     }
 
     .countdown-number {
