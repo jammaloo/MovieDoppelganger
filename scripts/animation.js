@@ -71,6 +71,7 @@ export class Animation {
     static async animateMatching(userCanvas, characterImages, duration = 5000) {
         const characterImg = document.getElementById('character-image');
         const matchPercentage = document.getElementById('match-percentage');
+        const matchPercentageMobile = document.getElementById('match-percentage-mobile');
 
         // Shuffle the character array once
         const shuffledCharacters = Animation.shuffleArray(characterImages);
@@ -93,6 +94,9 @@ export class Animation {
                 // Generate random percentage between 20-60
                 const percentage = Math.floor(Math.random() * 41) + 20;
                 matchPercentage.textContent = `${percentage}%`;
+                if (matchPercentageMobile) {
+                    matchPercentageMobile.textContent = `${percentage}%`;
+                }
 
                 currentSwitch++;
 

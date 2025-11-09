@@ -216,6 +216,15 @@ h2 {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
+#webcam-screen .container {
+    max-width: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 50px);
+    justify-content: space-between;
+}
+
 #webcam-video {
     width: 100%;
     height: auto;
@@ -265,6 +274,9 @@ h2 {
     display: flex;
     gap: 20px;
     justify-content: center;
+    flex-shrink: 0;
+    margin-top: auto;
+    padding-top: 20px;
 }
 
 /* Analysis Screen */
@@ -416,6 +428,10 @@ h2 {
     color: #ff0000;
     font-family: 'Courier New', monospace;
     text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+.match-percentage-mobile {
+    display: none;
 }
 
 /* Reveal Screen */
@@ -576,12 +592,72 @@ h2 {
         transform: rotate(90deg);
     }
 
+    /* Webcam Screen Mobile */
+    #webcam-screen .container {
+        padding: 10px;
+    }
+
+    .webcam-container {
+        max-width: 100%;
+        margin: 0 auto 20px;
+    }
+
+    .countdown-number {
+        font-size: 6rem;
+    }
+
+    .webcam-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .webcam-controls .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    /* Matching Screen Mobile */
     .matching-display {
         flex-direction: column;
     }
 
+    .matching-side.user-side {
+        display: none;
+    }
+
+    .matching-divider {
+        display: none;
+    }
+
+    .matching-side.character-side {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .matching-side.character-side .matching-label {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
     .match-percentage {
-        font-size: 2.5rem;
+        display: none;
+    }
+
+    .match-percentage-mobile {
+        display: block;
+        font-size: 3rem;
+        font-weight: bold;
+        color: #ff0000;
+        font-family: 'Courier New', monospace;
+        text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .matching-side.character-side .image-container {
+        max-width: 300px;
+        margin: 0 auto;
     }
 
     .reveal-image-container {
