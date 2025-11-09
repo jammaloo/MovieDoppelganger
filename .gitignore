@@ -1,0 +1,35 @@
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional: Ignore actual media files if you want to keep repo lightweight
+# Uncomment the lines below if you don't want to commit large media files
+# assets/images/*.jpg
+# assets/images/*.png
+# assets/images/characters/*.jpg
+# assets/images/characters/*.png
+# assets/sounds/*.mp3
+# assets/sounds/*.wav
+
+# Keep placeholder text files
+!assets/sounds/*.txt
+

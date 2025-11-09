@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Doppelganger - Find Your Movie Character Match!</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+    <!-- Privacy Disclaimer Banner -->
+    <div class="disclaimer-banner">
+        <p>🔒 <strong>Privacy First:</strong> No images or data are sent to any server. Everything runs locally in your
+            browser.</p>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen active">
+        <div class="loading-container">
+            <h1>Movie Doppelganger</h1>
+            <p>Preparing facial analysis technology...</p>
+            <div class="loading-bar">
+                <div id="loading-progress" class="loading-progress"></div>
+            </div>
+            <p id="loading-status" class="loading-status">Loading assets...</p>
+        </div>
+    </div>
+
+    <!-- Step 1: Photo Upload/Capture -->
+    <div id="upload-screen" class="screen">
+        <div class="container">
+            <h1>Movie Doppelganger</h1>
+            <p class="subtitle">Discover which movie character shares your facial features</p>
+
+            <div class="upload-options">
+                <div class="upload-card">
+                    <h2>📸 Take a Photo</h2>
+                    <p>Use your webcam</p>
+                    <button id="webcam-btn" class="btn btn-primary">Use Webcam</button>
+                </div>
+
+                <div class="upload-divider">OR</div>
+
+                <div class="upload-card">
+                    <h2>📁 Upload a Photo</h2>
+                    <p>Choose from your device</p>
+                    <label for="file-input" class="btn btn-primary">Choose File</label>
+                    <input type="file" id="file-input" accept="image/*" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webcam Screen -->
+    <div id="webcam-screen" class="screen">
+        <div class="container">
+            <h2>Position Your Face</h2>
+            <div class="webcam-container">
+                <video id="webcam-video" autoplay playsinline></video>
+                <canvas id="webcam-canvas" style="display: none;"></canvas>
+                <div id="countdown-overlay" class="countdown-overlay">
+                    <div id="countdown-number" class="countdown-number"></div>
+                </div>
+            </div>
+            <div class="webcam-controls">
+                <button id="take-photo-btn" class="btn btn-primary">Take Photo</button>
+                <button id="cancel-webcam-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Face Analysis -->
+    <div id="analysis-screen" class="screen">
+        <div class="container">
+            <h2>Analyzing Facial Structure</h2>
+            <div class="analysis-container">
+                <canvas id="analysis-canvas"></canvas>
+                <div class="analysis-status">
+                    <p id="analysis-text">Detecting facial features...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen" class="screen">
+        <div class="container">
+            <div class="error-container">
+                <h2>⚠️ No Face Detected</h2>
+                <p id="error-message">We couldn't detect a face in your photo. Please try again with a clear photo
+                    showing your face.</p>
+                <button id="retry-btn" class="btn btn-primary">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Matching Sequence -->
+    <div id="matching-screen" class="screen">
+        <div class="matching-container">
+            <div class="matching-header">
+                <h2>FACIAL RECOGNITION SYSTEM</h2>
+                <p class="matching-status">Scanning database...</p>
+            </div>
+            <div class="matching-display">
+                <div class="matching-side user-side">
+                    <div class="matching-label">YOUR FACE</div>
+                    <div class="image-container">
+                        <canvas id="user-face-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="matching-divider">
+                    <div class="vs-text">VS</div>
+                    <div class="match-percentage" id="match-percentage">0%</div>
+                </div>
+                <div class="matching-side character-side">
+                    <div class="matching-label">DATABASE MATCH</div>
+                    <div class="image-container">
+                        <img id="character-image" src="" alt="Character">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 4: Final Reveal -->
+    <div id="reveal-screen" class="screen">
+        <div class="reveal-container">
+            <div id="match-found-flash" class="match-found-flash">
+                <h1>97% FACIAL MATCH FOUND</h1>
+            </div>
+            <div class="reveal-content">
+                <div class="reveal-image-container">
+                    <canvas id="reveal-user-canvas"></canvas>
+                    <img id="reveal-result-image" src="" alt="Match Result">
+                </div>
+                <div id="reveal-text" class="reveal-text">
+                    <h2>Your facial structure has a 97% similarity with</h2>
+                    <h1>Sloth from The Goonies (1985)</h1>
+                    <p class="congratulations">Congratulations! 🎉</p>
+                </div>
+                <button id="restart-btn" class="btn btn-primary">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include external libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/gh/cgarciagl/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <!-- Application scripts -->
+    <script type="module" src="scripts/app.js"></script>
+</body>
+
+</html>
