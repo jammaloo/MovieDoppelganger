@@ -181,6 +181,12 @@ class MovieDoppelgangerApp {
      * Process uploaded/captured image
      */
     async processImage(image) {
+        // Unlock audio context on mobile right after user interaction
+        // This ensures the trumpet sound can play later
+        if (this.assets && this.assets.sounds && this.assets.sounds.trumpet) {
+            await Animation.prepareAudio(this.assets.sounds.trumpet);
+        }
+
         // Switch to analysis screen
         Animation.switchScreen('upload-screen', 'analysis-screen');
         Animation.switchScreen('webcam-screen', 'analysis-screen');

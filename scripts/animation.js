@@ -110,37 +110,53 @@ export class Animation {
 
     /**
      * Prepare audio for playback (unlock audio context on mobile)
+     * This must be called in response to a user gesture to work on mobile
      */
     static async prepareAudio(audio) {
         if (!audio) return;
 
         try {
-            // On mobile, we need to "unlock" the audio context by playing a silent sound
-            // or ensuring the audio is ready. Try to play and immediately pause.
-            if (audio.readyState >= 2) {
-                // Audio is loaded, try a quick play/pause to unlock context
-                const wasPlaying = !audio.paused;
-                if (!wasPlaying) {
-                    audio.volume = 0.01; // Very quiet
-                    const playPromise = audio.play();
-                    if (playPromise) {
-                        await playPromise.catch(() => { });
-                        audio.pause();
-                        audio.currentTime = 0;
-                        audio.volume = 1.0; // Restore volume
-                    }
-                }
-            } else {
-                // Audio not ready, load it
+            // Ensure audio is loaded first
+            if (audio.readyState < 2) {
                 audio.load();
+                // Wait for audio to be ready, but don't wait too long
                 await new Promise(resolve => {
                     if (audio.readyState >= 2) {
                         resolve();
                     } else {
-                        audio.addEventListener('canplay', resolve, { once: true });
-                        setTimeout(resolve, 1000); // Timeout after 1 second
+                        const checkReady = () => {
+                            if (audio.readyState >= 2) {
+                                resolve();
+                            }
+                        };
+                        audio.addEventListener('canplay', checkReady, { once: true });
+                        audio.addEventListener('canplaythrough', checkReady, { once: true });
+                        setTimeout(resolve, 2000); // Timeout after 2 seconds
                     }
                 });
+            }
+
+            // On mobile, unlock audio context by playing and immediately pausing
+            // This must happen in response to user interaction
+            if (audio.readyState >= 2 && audio.paused) {
+                const originalVolume = audio.volume;
+                audio.volume = 0.001; // Almost silent
+                audio.currentTime = 0;
+
+                try {
+                    const playPromise = audio.play();
+                    if (playPromise) {
+                        await playPromise;
+                        // Immediately pause to unlock context
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }
+                } catch (err) {
+                    // If play fails, that's okay - we tried
+                    console.warn('Could not unlock audio context:', err);
+                } finally {
+                    audio.volume = originalVolume;
+                }
             }
         } catch (err) {
             console.warn('Error preparing audio:', err);
