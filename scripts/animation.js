@@ -109,6 +109,45 @@ export class Animation {
     }
 
     /**
+     * Prepare audio for playback (unlock audio context on mobile)
+     */
+    static async prepareAudio(audio) {
+        if (!audio) return;
+
+        try {
+            // On mobile, we need to "unlock" the audio context by playing a silent sound
+            // or ensuring the audio is ready. Try to play and immediately pause.
+            if (audio.readyState >= 2) {
+                // Audio is loaded, try a quick play/pause to unlock context
+                const wasPlaying = !audio.paused;
+                if (!wasPlaying) {
+                    audio.volume = 0.01; // Very quiet
+                    const playPromise = audio.play();
+                    if (playPromise) {
+                        await playPromise.catch(() => { });
+                        audio.pause();
+                        audio.currentTime = 0;
+                        audio.volume = 1.0; // Restore volume
+                    }
+                }
+            } else {
+                // Audio not ready, load it
+                audio.load();
+                await new Promise(resolve => {
+                    if (audio.readyState >= 2) {
+                        resolve();
+                    } else {
+                        audio.addEventListener('canplay', resolve, { once: true });
+                        setTimeout(resolve, 1000); // Timeout after 1 second
+                    }
+                });
+            }
+        } catch (err) {
+            console.warn('Error preparing audio:', err);
+        }
+    }
+
+    /**
      * Animate final reveal sequence
      */
     static async animateReveal(userCanvas, slothImage, trumpetSound) {
@@ -118,6 +157,11 @@ export class Animation {
         const revealResultImage = document.getElementById('reveal-result-image');
         const revealText = document.getElementById('reveal-text');
         const restartBtn = document.getElementById('restart-btn');
+
+        // Prepare audio early to unlock audio context on mobile
+        if (trumpetSound) {
+            await Animation.prepareAudio(trumpetSound);
+        }
 
         // Step 1: Flash "97% MATCH FOUND" - linger to build tension
         matchFoundFlash.classList.add('active');
@@ -146,6 +190,16 @@ export class Animation {
         await Animation.wait(1000);
         if (trumpetSound) {
             try {
+                // On mobile, audio context might be suspended - ensure it's ready
+                // Reload the audio to ensure it's in a playable state
+                if (trumpetSound.readyState === 0) {
+                    // Not loaded yet, load it first
+                    trumpetSound.load();
+                }
+
+                // Wait a moment for audio to be ready (especially important on mobile)
+                await Animation.wait(100);
+
                 trumpetSound.currentTime = 0;
                 const playPromise = trumpetSound.play();
                 if (playPromise !== undefined) {
@@ -153,7 +207,14 @@ export class Animation {
                         console.warn('Could not play trumpet sound:', err);
                         if (err.name === 'NotAllowedError') {
                             console.warn('Audio playback blocked. User interaction may be required.');
+                        } else if (err.name === 'NotSupportedError') {
+                            console.warn('Audio format not supported.');
                         }
+                        // Try to reload and play again as fallback
+                        trumpetSound.load();
+                        setTimeout(() => {
+                            trumpetSound.play().catch(e => console.warn('Retry failed:', e));
+                        }, 200);
                     });
                 }
             } catch (err) {

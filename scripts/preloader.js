@@ -15,17 +15,35 @@ export class Preloader {
      * Preload an image
      */
     loadImage(src) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const img = new Image();
-            img.onload = () => {
+            let resolved = false;
+
+            const markAsLoaded = () => {
+                if (resolved) return;
+                resolved = true;
                 this.loadedAssets++;
                 this.updateProgress();
+            };
+
+            // Add timeout for images that might hang
+            const timeout = setTimeout(() => {
+                if (!resolved) {
+                    console.warn(`Image loading timeout for: ${src}`);
+                    markAsLoaded();
+                    resolve(null);
+                }
+            }, 30000); // 30 second timeout
+
+            img.onload = () => {
+                clearTimeout(timeout);
+                markAsLoaded();
                 resolve(img);
             };
             img.onerror = () => {
+                clearTimeout(timeout);
                 console.warn(`Failed to load image: ${src}`);
-                this.loadedAssets++;
-                this.updateProgress();
+                markAsLoaded();
                 resolve(null); // Resolve anyway to not block loading
             };
             img.src = src;
@@ -36,31 +54,62 @@ export class Preloader {
      * Preload an audio file
      */
     loadSound(src) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const audio = new Audio();
             audio.preload = 'auto';
             audio.volume = 1.0;
+            let resolved = false;
+
+            // Prevent double-counting
+            const markAsLoaded = () => {
+                if (resolved) return;
+                resolved = true;
+                this.loadedAssets++;
+                this.updateProgress();
+            };
 
             // Try to load the audio
             const handleCanPlay = () => {
                 audio.removeEventListener('canplaythrough', handleCanPlay);
                 audio.removeEventListener('loadeddata', handleCanPlay);
-                this.loadedAssets++;
-                this.updateProgress();
+                audio.removeEventListener('canplay', handleCanPlay);
+                markAsLoaded();
                 resolve(audio);
             };
 
             const handleError = () => {
                 audio.removeEventListener('error', handleError);
                 console.warn(`Failed to load sound: ${src}`);
-                this.loadedAssets++;
-                this.updateProgress();
+                markAsLoaded();
                 resolve(null);
             };
 
-            audio.addEventListener('canplaythrough', handleCanPlay);
-            audio.addEventListener('loadeddata', handleCanPlay);
-            audio.addEventListener('error', handleError);
+            // Add timeout for mobile browsers that might not fire events properly
+            const timeout = setTimeout(() => {
+                if (!resolved) {
+                    console.warn(`Sound loading timeout for: ${src}`);
+                    markAsLoaded();
+                    resolve(audio); // Resolve with audio even if events didn't fire
+                }
+            }, 10000); // 10 second timeout
+
+            // Multiple event listeners for better mobile compatibility
+            audio.addEventListener('canplaythrough', () => {
+                clearTimeout(timeout);
+                handleCanPlay();
+            });
+            audio.addEventListener('loadeddata', () => {
+                clearTimeout(timeout);
+                handleCanPlay();
+            });
+            audio.addEventListener('canplay', () => {
+                clearTimeout(timeout);
+                handleCanPlay();
+            });
+            audio.addEventListener('error', () => {
+                clearTimeout(timeout);
+                handleError();
+            });
 
             audio.src = src;
             audio.load(); // Explicitly trigger loading
@@ -74,15 +123,26 @@ export class Preloader {
         const MODEL_URL = 'https://cdn.jsdelivr.net/gh/cgarciagl/face-api.js@0.22.2/weights';
 
         try {
+            // Load models with timeout to prevent hanging
+            const loadWithTimeout = (promise, timeoutMs) => {
+                return Promise.race([
+                    promise,
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Model loading timeout')), timeoutMs)
+                    )
+                ]);
+            };
+
             await Promise.all([
-                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+                loadWithTimeout(faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL), 60000),
+                loadWithTimeout(faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), 60000)
             ]);
             this.loadedAssets += 2;
             this.updateProgress();
             return true;
         } catch (error) {
             console.error('Error loading face-api models:', error);
+            // Still increment counter even on error to prevent progress bar from getting stuck
             this.loadedAssets += 2;
             this.updateProgress();
             return false;
